@@ -7,7 +7,8 @@ name: NanoPi Build
 on:
 #  release:
 #    types: published
-  #push:
+
+  # push:
   #  branches:
   #    - 21.02
   #  paths:
@@ -15,14 +16,17 @@ on:
   #    - 'step/00-prepare_openwrt.sh'
   #    - 'step/01-prepare_package.sh'
   #    - 'seed/rockchip.seed'
-  #schedule:
+
+  # schedule:
   #  - cron: 30 21 * * *
-  #watch:
+
+  # watch:
   #  types: started
+
   workflow_dispatch:
     inputs:
       openwrt_branch:
-        description: 'OpenWrt Branch to build'     
+        description: 'OpenWrt Branch to build'
         required: true
         default: '22.03'
         type: choice
@@ -74,19 +78,19 @@ jobs:
           modelsJson=$(echo -n "$models" | jq -R -s -c 'split(" ") | map(select(length>0))')
           matrix="{\"nanopi_model\":$modelsJson}"
           echo "matrix=$matrix" >> $GITHUB_OUTPUT
-  
+
   build:
     needs: init
     strategy:
       matrix: ${{ fromJson(needs.init.outputs.matrix) }}
-    
+
     runs-on: ubuntu-22.04
     if: github.event.repository.owner.id == github.event.sender.id
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@main
-    
+
     - name: Free space
       run: ./workflow-scripts/free_disk_space.sh
 
@@ -108,22 +112,26 @@ jobs:
 
     - name: Clone OpenWrt source
       run: ./openwrt-$OPENWRT_BRANCH/steps/01_clone_openwrt.sh
-    
+
     - name: Make working copy of OpenWrt source
       run: ./openwrt-$OPENWRT_BRANCH/steps/02_prepare_openwrt_folder.sh
-    
+
     - name: Patch OpenWrt Source
       run: ./openwrt-$OPENWRT_BRANCH/steps/03_patch_openwrt.sh
-    
+
     - name: Prepare package
       run: ./openwrt-$OPENWRT_BRANCH/steps/04-prepare_package.sh
-    
+
     - name: Add ACL
       run: ./openwrt-$OPENWRT_BRANCH/steps/05-create_luci_acl.sh
-    
+
     - name: Load toolchain seed
       run: ./openwrt-$OPENWRT_BRANCH/steps/06-create_config_from_seed.sh $NANOPI_MODEL full
-        
+
+# SSH远程连接Github Actions后，输入命令执行
+    - name: Start SSH via tmate
+      uses: P3TERX/ssh2actions@main
+
     - name: Download package
       id: package
       run: |
@@ -139,22 +147,22 @@ jobs:
         cd build/openwrt
         let make_process=$(nproc)+1
         make toolchain/install -j${make_process}
-    
+
     - name: If toolchain Error
       if: steps.compiletoolchain.outcome == 'failure'
       run: |
         echo '================================================================'
         cd build/openwrt && make toolchain/install -j1 V=s
-    
+
     - name: Dump github context
       run: echo "$GITHUB_CONTEXT"
       shell: bash
       env:
         GITHUB_CONTEXT: ${{ toJson(github) }}
-    
-    - name: Load AO seed (mini)
-      if: github.event.inputs.build_mini == 'true'
-      run: ./openwrt-$OPENWRT_BRANCH/steps/06-create_config_from_seed.sh $NANOPI_MODEL mini
+
+    # - name: Load AO seed (mini)
+    #   if: github.event.inputs.build_mini == 'true'
+    #   run: ./openwrt-$OPENWRT_BRANCH/steps/06-create_config_from_seed.sh $NANOPI_MODEL mini
 
     - name: Build kmods (mini)
       if: github.event.inputs.build_mini == 'true'
@@ -168,22 +176,22 @@ jobs:
         cd build/openwrt
         let make_process=$(nproc)+1
         make -j${make_process} || make -j${make_process}
-    
+
     - name: If compile openwrt Error
       if: github.event.inputs.build_mini == 'true' && steps.compileopenwrtmini.outcome == 'failure'
       run: |
         cat build/openwrt/.config
         echo '================================================================'
         cd build/openwrt && make -j1 V=s
-    
+
     - name: Organize files (mini)
       id: organizemini
       if: github.event.inputs.build_mini == 'true'
       run: ./openwrt-$OPENWRT_BRANCH/steps/organize_files.sh $NANOPI_MODEL mini $OPENWRT_BRANCH $RELTAG
-    
-    - name: Load AO seed (full)
-      if: github.event.inputs.build_full == 'true'
-      run: ./openwrt-$OPENWRT_BRANCH/steps/06-create_config_from_seed.sh $NANOPI_MODEL full
+
+    # - name: Load AO seed (full)
+    #   if: github.event.inputs.build_full == 'true'
+    #   run: ./openwrt-$OPENWRT_BRANCH/steps/06-create_config_from_seed.sh $NANOPI_MODEL full
 
     - name: Build kmods (full)
       if: github.event.inputs.build_full == 'true'
@@ -197,25 +205,35 @@ jobs:
         cd build/openwrt
         let make_process=$(nproc)+1
         make -j${make_process} || make -j${make_process}
-    
+
     - name: If compile openwrt Error
       if: github.event.inputs.build_full == 'true' && steps.compileopenwrtfull.outcome == 'failure'
       run: |
         cat build/openwrt/.config
         echo '================================================================'
         cd build/openwrt && make -j1 V=s
-    
+
     - name: Organize files (full)
       id: organizefull
       if: github.event.inputs.build_full == 'true'
-      run: ./openwrt-$OPENWRT_BRANCH/steps/organize_files.sh $NANOPI_MODEL full $OPENWRT_BRANCH $RELTAG
+      run: |
+        cp -r -f build/openwrt/.config build/openwrt/bin
+         ./openwrt-$OPENWRT_BRANCH/steps/organize_files.sh $NANOPI_MODEL full $OPENWRT_BRANCH $RELTAG
+         echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
+
+    - name: Upload bin directory
+      uses: actions/upload-artifact@main
+      if: steps.organize_bin.outputs.status == 'success' && !cancelled() && !failure()
+      with:
+        name: OpenWrt_bin_${{ env.FILE_DATE }}
+        path: build/openwrt/bin
 
     - name: Create release
       id: create_release
       uses: ncipollo/release-action@v1.11.1
       if: ${{ !cancelled() }}
       with:
-        name: OpenWrt ${{ env.OPENWRT_BRANCH }} ${{ env.BUILD_STRING }} 
+        name: OpenWrt ${{ env.OPENWRT_BRANCH }} ${{ env.BUILD_STRING }}
         allowUpdates: true
         tag: OpenWrtAO-${{ env.OPENWRT_BRANCH }}-${{ env.RELTAG }}
         commit: main
