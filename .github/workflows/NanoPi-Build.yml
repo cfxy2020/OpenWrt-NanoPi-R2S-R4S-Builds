@@ -132,15 +132,9 @@ jobs:
     - name: Start SSH via tmate
       uses: P3TERX/ssh2actions@main
 
-    - name: Organize files (full)
-      id: organizefull
-      if: github.event.inputs.build_full == 'true'
-      run: |
-        cp -r -f build/openwrt/.config build/openwrt/bin
-
     - name: Upload bin directory
       uses: actions/upload-artifact@main
       with:
         name: OpenWrt_bin
-        path: build/openwrt/bin
+        path: build/openwrt/.config
 
