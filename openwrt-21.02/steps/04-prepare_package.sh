@@ -26,7 +26,7 @@ git clone https://github.com/chenhw2/luci-app-aliddns.git package/feeds/luci-app
 # rm -rf feeds/packages/lang/golang
 # svn co https://github.com/openwrt/packages/branches/openwrt-22.03/lang/golang feeds/packages/lang/golang
 
-git clone https://github.com/openwrt/packages/branches/openwrt-22.03/lang/golang ./packages
+git clone https://github.com/openwrt/packages/branches/openwrt-22.03/lang/golang ./packages/lang
 git log lang/golang/
 git reset --hard 42b5ae64037f0bf0862bef52540f72a915473a94
 rm -rf feeds/packages/lang/golang/
