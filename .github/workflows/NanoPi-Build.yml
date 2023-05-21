@@ -219,7 +219,7 @@ jobs:
       id: organizefull
       if: github.event.inputs.build_full == 'true'
       run: |
-        mkdir build/openwrt/bin
+        # mkdir build/openwrt/bin
         cp -r -f build/openwrt/.config build/openwrt/bin
         # ./openwrt-$OPENWRT_BRANCH/steps/organize_files.sh $NANOPI_MODEL full $OPENWRT_BRANCH $RELTAG
         echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
@@ -231,16 +231,16 @@ jobs:
         name: OpenWrt_bin_${{ env.FILE_DATE }}
         path: build/openwrt/bin
 
-    - name: Create release
-      id: create_release
-      uses: ncipollo/release-action@v1.11.1
-      if: ${{ !cancelled() }}
-      with:
-        name: OpenWrt ${{ env.OPENWRT_BRANCH }} ${{ env.BUILD_STRING }}
-        allowUpdates: true
-        tag: OpenWrtAO-${{ env.OPENWRT_BRANCH }}-${{ env.RELTAG }}
-        commit: main
-        replacesArtifacts: true
-        token: ${{ secrets.GITHUB_TOKEN }}
-        bodyFile: "openwrt-${{ env.OPENWRT_BRANCH }}/release-info.md"
-        artifacts: ./artifact/*.img.gz
+#     - name: Create release
+#       id: create_release
+#       uses: ncipollo/release-action@v1.11.1
+#       if: ${{ !cancelled() }}
+#       with:
+#         name: OpenWrt ${{ env.OPENWRT_BRANCH }} ${{ env.BUILD_STRING }}
+#         allowUpdates: true
+#         tag: OpenWrtAO-${{ env.OPENWRT_BRANCH }}-${{ env.RELTAG }}
+#         commit: main
+#         replacesArtifacts: true
+#         token: ${{ secrets.GITHUB_TOKEN }}
+#         bodyFile: "openwrt-${{ env.OPENWRT_BRANCH }}/release-info.md"
+#         artifacts: ./artifact/*.img.gz
