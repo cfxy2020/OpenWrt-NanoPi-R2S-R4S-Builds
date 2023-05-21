@@ -146,13 +146,13 @@ jobs:
       run: |
         cd build/openwrt
         let make_process=$(nproc)+1
-        make toolchain/install -j${make_process}
+        make toolchain/install -j${make_process} V=s
 
     - name: If toolchain Error
       if: steps.compiletoolchain.outcome == 'failure'
       run: |
         echo '================================================================'
-        cd build/openwrt && make toolchain/install -j1 V=s
+        # cd build/openwrt && make toolchain/install -j1 V=s
 
     - name: Dump github context
       run: echo "$GITHUB_CONTEXT"
