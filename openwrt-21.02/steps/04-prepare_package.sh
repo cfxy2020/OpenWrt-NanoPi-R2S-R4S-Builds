@@ -23,8 +23,15 @@ git clone https://github.com/chenhw2/luci-app-aliddns.git package/feeds/luci-app
 ./scripts/feeds update -a
 
 # Fix Bug：无法编译最新版的v2ray-core
-rm -rf feeds/packages/lang/golang
-svn co https://github.com/openwrt/packages/branches/openwrt-22.03/lang/golang feeds/packages/lang/golang
+# rm -rf feeds/packages/lang/golang
+# svn co https://github.com/openwrt/packages/branches/openwrt-22.03/lang/golang feeds/packages/lang/golang
+
+git clone https://github.com/openwrt/packages/branches/openwrt-22.03/lang/golang ./packages
+git log lang/golang/
+git reset --hard 42b5ae64037f0bf0862bef52540f72a915473a94
+rm -rf feeds/packages/lang/golang/
+cp -r ./packages/lang/golang/ feeds/packages/lang/
+
 
 # replace vpn routing packages
 rm -rf feeds/packages/net/vpn-policy-routing/
