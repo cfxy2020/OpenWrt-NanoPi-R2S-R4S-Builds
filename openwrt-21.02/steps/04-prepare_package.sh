@@ -30,7 +30,7 @@ git clone https://github.com/openwrt/packages/branches/openwrt-22.03/lang/golang
 git log lang/golang/
 git reset --hard 42b5ae64037f0bf0862bef52540f72a915473a94
 rm -rf feeds/packages/lang/golang/
-cp -r ./packages/lang/golang/ feeds/packages/lang/
+cp -r ./packages/lang feeds/packages/lang/
 
 
 # replace vpn routing packages
