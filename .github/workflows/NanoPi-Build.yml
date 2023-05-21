@@ -174,9 +174,9 @@ jobs:
       continue-on-error: true
       run: |
         cd build/openwrt
-        let make_process=$(nproc)+1
-        make -j${make_process} || make -j${make_process}
-
+        let make_process=$(nproc)+1        
+        make -j${make_process} V=s || make -j${make_process}
+        
     - name: If compile openwrt Error
       if: github.event.inputs.build_mini == 'true' && steps.compileopenwrtmini.outcome == 'failure'
       run: |
@@ -204,14 +204,15 @@ jobs:
       run: |
         cd build/openwrt
         let make_process=$(nproc)+1
-        make -j${make_process} || make -j${make_process}
+        # make -j${make_process} || make -j${make_process}
+        make -j${make_process} V=s
 
     - name: If compile openwrt Error
       if: github.event.inputs.build_full == 'true' && steps.compileopenwrtfull.outcome == 'failure'
       run: |
         cat build/openwrt/.config
         echo '================================================================'
-        cd build/openwrt && make -j1 V=s
+        # cd build/openwrt && make -j1 V=s
 
     - name: Organize files (full)
       id: organizefull
