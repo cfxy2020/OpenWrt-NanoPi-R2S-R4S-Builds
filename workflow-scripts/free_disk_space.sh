@@ -38,6 +38,11 @@ sudo apt-get remove -y '^llvm-.*'
 sudo apt-get remove -y 'php.*'
 sudo apt-get remove -y azure-cli google-cloud-sdk hhvm google-chrome-stable firefox powershell mono-devel
 sudo apt-get autoremove -y
+
+# sudo swapoff -a
+sudo rm -f /swapfile
+sudo rm -rf /swapfile /usr/share/dotnet /usr/local/lib/android /opt/ghc
+
 sudo apt-get clean
 df -h
 echo "Removing large directories"
