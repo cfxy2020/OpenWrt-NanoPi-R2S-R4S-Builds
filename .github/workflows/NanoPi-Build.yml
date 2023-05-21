@@ -146,7 +146,7 @@ jobs:
       run: |
         cd build/openwrt
         let make_process=$(nproc)+1
-        make toolchain/install -j${make_process} V=s
+        # make toolchain/install -j${make_process} V=s
 
     - name: If toolchain Error
       if: steps.compiletoolchain.outcome == 'failure'
