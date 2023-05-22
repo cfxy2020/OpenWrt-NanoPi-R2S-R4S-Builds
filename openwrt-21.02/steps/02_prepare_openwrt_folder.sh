@@ -12,7 +12,7 @@ cp -R openwrt-fresh-2102 openwrt
 
 # freeze revision to 21.02.5
 cd openwrt
-git reset --hard 57a6d97ddf8f6541a52e0f8fad8c6f47685a1bc3
+git reset --hard ea34ce11c17c6df046effd65a674f79034b124ab
 
 echo "Current OpenWRT commit"
 git log -1
