@@ -17,8 +17,8 @@ mkdir -p ./artifact/
 mv build/openwrt/bin/targets/rockchip/armv8/*sysupgrade.img* ./artifact/
 cd ./artifact/
 ls -Ahl
-mv openwrt-rockchip-armv8-friendlyarm_nanopi-$NANOPI_MODEL_LOW-ext4-sysupgrade.img.gz OpenWrt-AO-NanoPi$NANOPI_MODEL-$VARIANT-$OPENWRT_BRANCH-$RELTAG-ext4.img.gz
-mv openwrt-rockchip-armv8-friendlyarm_nanopi-$NANOPI_MODEL_LOW-squashfs-sysupgrade.img.gz OpenWrt-AO-NanoPi$NANOPI_MODEL-$VARIANT-$OPENWRT_BRANCH-$RELTAG-squashfs.img.gz
+mv openwrt-rockchip-armv8-friendlyarm_nanopi-$NANOPI_MODEL_LOW-ext4-sysupgrade.img.gz Openwrt-$OPENWRT_BRANCH-rockchip-armv8-friendlyarm_nanopi-$NANOPI_MODEL_LOW-ext4-sysupgrade-$VARIANT-$RELTAG.img.gz
+mv openwrt-rockchip-armv8-friendlyarm_nanopi-$NANOPI_MODEL_LOW-squashfs-sysupgrade.img.gz Openwrt-$OPENWRT_BRANCH-rockchip-armv8-friendlyarm_nanopi-$NANOPI_MODEL_LOW-squashfs-sysupgrade-$VARIANT-$RELTAG.img.gz
 gzip -d *.gz && exit 0
 gzip --best *.img
 ls -Ahl
