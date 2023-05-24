@@ -129,108 +129,113 @@ jobs:
       run: ./openwrt-$OPENWRT_BRANCH/steps/06-create_config_from_seed.sh $NANOPI_MODEL full
 
 # SSH远程连接Github Actions后，输入命令执行
-    - name: Start SSH via tmate
-      uses: P3TERX/ssh2actions@main
+#     - name: Start SSH via tmate
+#       uses: P3TERX/ssh2actions@main
 
-#     - name: Download package
-#       id: package
-#       run: |
-#         cd build/openwrt
-#         # make download -j10
-#         make download -j$(expr $(nproc) + 1) V=s
-#         find dl -size -1024c -exec ls -l {} \;
-#         find dl -size -1024c -exec rm -f {} \;
+    # - name: Upload .config
+    #   uses: actions/upload-artifact@main
+    #   with:
+    #     name: OpenWrt_config
+    #     path: build/openwrt/.config
 
-#     - name: Make toolchain-aarch64
-#       id: compiletoolchain
-#       continue-on-error: true
-#       run: |
-#         cd build/openwrt
-#         let make_process=$(nproc)+1
-#         # make toolchain/install -j${make_process} V=s
+    - name: Download package
+      id: package
+      run: |
+        cd build/openwrt
+        # make download -j10
+        make download -j$(expr $(nproc) + 1) V=s
+        find dl -size -1024c -exec ls -l {} \;
+        find dl -size -1024c -exec rm -f {} \;
 
-#     - name: If toolchain Error
-#       if: steps.compiletoolchain.outcome == 'failure'
-#       run: |
-#         echo '================================================================'
-#         # cd build/openwrt && make toolchain/install -j1 V=s
+    - name: Make toolchain-aarch64
+      id: compiletoolchain
+      continue-on-error: true
+      run: |
+        cd build/openwrt
+        let make_process=$(nproc)+1
+        make toolchain/install -j${make_process} V=s
 
-#     - name: Dump github context
-#       run: echo "$GITHUB_CONTEXT"
-#       shell: bash
-#       env:
-#         GITHUB_CONTEXT: ${{ toJson(github) }}
+    - name: If toolchain Error
+      if: steps.compiletoolchain.outcome == 'failure'
+      run: |
+        echo '================================================================'
+        # cd build/openwrt && make toolchain/install -j1 V=s
 
-#     - name: Load AO seed (mini)
-#       if: github.event.inputs.build_mini == 'true'
-#       run: ./openwrt-$OPENWRT_BRANCH/steps/06-create_config_from_seed.sh $NANOPI_MODEL mini
+    - name: Dump github context
+      run: echo "$GITHUB_CONTEXT"
+      shell: bash
+      env:
+        GITHUB_CONTEXT: ${{ toJson(github) }}
 
-#     - name: Build kmods (mini)
-#       if: github.event.inputs.build_mini == 'true'
-#       run: ./openwrt-$OPENWRT_BRANCH/steps/07-all_kmods.sh
+    - name: Load AO seed (mini)
+      if: github.event.inputs.build_mini == 'true'
+      run: ./openwrt-$OPENWRT_BRANCH/steps/06-create_config_from_seed.sh $NANOPI_MODEL mini
 
-#     - name: Compile OpenWRT (mini)
-#       id: compileopenwrtmini
-#       if: github.event.inputs.build_mini == 'true'
-#       continue-on-error: true
-#       run: |
-#         cd build/openwrt
-#         let make_process=$(nproc)+1
-#         make -j${make_process} || make -j${make_process}
+    - name: Build kmods (mini)
+      if: github.event.inputs.build_mini == 'true'
+      run: ./openwrt-$OPENWRT_BRANCH/steps/07-all_kmods.sh
 
-#     - name: If compile openwrt Error (mini)
-#       if: github.event.inputs.build_mini == 'true' && steps.compileopenwrtmini.outcome == 'failure'
-#       run: |
-#         cat build/openwrt/.config
-#         echo '================================================================'
-#         cd build/openwrt && make -j1 V=s
+    - name: Compile OpenWRT (mini)
+      id: compileopenwrtmini
+      if: github.event.inputs.build_mini == 'true'
+      continue-on-error: true
+      run: |
+        cd build/openwrt
+        let make_process=$(nproc)+1
+        make -j${make_process} || make -j${make_process}
 
-#     - name: Organize files (mini)
-#       id: organizemini
-#       if: github.event.inputs.build_mini == 'true'
-#       run: ./openwrt-$OPENWRT_BRANCH/steps/organize_files.sh $NANOPI_MODEL mini $OPENWRT_BRANCH $RELTAG
+    - name: If compile openwrt Error (mini)
+      if: github.event.inputs.build_mini == 'true' && steps.compileopenwrtmini.outcome == 'failure'
+      run: |
+        cat build/openwrt/.config
+        echo '================================================================'
+        cd build/openwrt && make -j1 V=s
 
-#     - name: Load AO seed (full)
-#       if: github.event.inputs.build_full == 'true'
-#       run: ./openwrt-$OPENWRT_BRANCH/steps/06-create_config_from_seed.sh $NANOPI_MODEL full
+    - name: Organize files (mini)
+      id: organizemini
+      if: github.event.inputs.build_mini == 'true'
+      run: ./openwrt-$OPENWRT_BRANCH/steps/organize_files.sh $NANOPI_MODEL mini $OPENWRT_BRANCH $RELTAG
 
-#     - name: Build kmods (full)
-#       if: github.event.inputs.build_full == 'true'
-#       run: ./openwrt-$OPENWRT_BRANCH/steps/07-all_kmods.sh
+    - name: Load AO seed (full)
+      if: github.event.inputs.build_full == 'true'
+      run: ./openwrt-$OPENWRT_BRANCH/steps/06-create_config_from_seed.sh $NANOPI_MODEL full
 
-#     - name: Compile OpenWRT (full)
-#       id: compileopenwrtfull
-#       if: github.event.inputs.build_full == 'true'
-#       continue-on-error: true
-#       run: |
-#         cd build/openwrt
-#         let make_process=$(nproc)+1
-#         # make -j${make_process} || make -j${make_process}
-#         make -j${make_process} V=s
+    - name: Build kmods (full)
+      if: github.event.inputs.build_full == 'true'
+      run: ./openwrt-$OPENWRT_BRANCH/steps/07-all_kmods.sh
 
-#     - name: If compile openwrt Error (full)
-#       if: github.event.inputs.build_full == 'true' && steps.compileopenwrtfull.outcome == 'failure'
-#       run: |
-#         cat build/openwrt/.config
-#         echo '================================================================'
-#         # cd build/openwrt && make -j1 V=s
+    - name: Compile OpenWRT (full)
+      id: compileopenwrtfull
+      if: github.event.inputs.build_full == 'true'
+      continue-on-error: true
+      run: |
+        cd build/openwrt
+        let make_process=$(nproc)+1
+        # make -j${make_process} || make -j${make_process}
+        make -j${make_process} V=s
 
-#     - name: Organize files (full)
-#       id: organizefull
-#       if: github.event.inputs.build_full == 'true'
-#       run: |
-#         # mkdir build/openwrt/bin
-#         cp -r -f build/openwrt/.config build/openwrt/bin
-#         # ./openwrt-$OPENWRT_BRANCH/steps/organize_files.sh $NANOPI_MODEL full $OPENWRT_BRANCH $RELTAG
-#         echo "status=success" >> $GITHUB_OUTPUT
-#         echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
+    - name: If compile openwrt Error (full)
+      if: github.event.inputs.build_full == 'true' && steps.compileopenwrtfull.outcome == 'failure'
+      run: |
+        cat build/openwrt/.config
+        echo '================================================================'
+        # cd build/openwrt && make -j1 V=s
 
-#     - name: Upload bin directory
-#       uses: actions/upload-artifact@main
-#       if: steps.organizefull.outputs.status == 'success' && !cancelled() && !failure()
-#       with:
-#         name: OpenWrt_bin_${{ env.FILE_DATE }}
-#         path: build/openwrt/bin
+    - name: Organize files (full)
+      id: organizefull
+      if: github.event.inputs.build_full == 'true'
+      run: |
+        ./openwrt-$OPENWRT_BRANCH/steps/organize_files.sh $NANOPI_MODEL full $OPENWRT_BRANCH $RELTAG
+        cp -r -f build/openwrt/.config build/openwrt/bin
+        echo "status=success" >> $GITHUB_OUTPUT
+        echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
+
+    - name: Upload bin directory
+      uses: actions/upload-artifact@main
+      if: steps.organizefull.outputs.status == 'success' && !cancelled() && !failure()
+      with:
+        name: OpenWrt_bin_${{ env.FILE_DATE }}
+        path: build/openwrt/bin
 
     # - name: Create release
     #   id: create_release
