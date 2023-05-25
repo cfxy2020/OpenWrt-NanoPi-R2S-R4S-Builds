@@ -225,7 +225,7 @@ jobs:
       id: organizefull
       if: github.event.inputs.build_full == 'true'
       run: |
-        ./openwrt-$OPENWRT_BRANCH/steps/organize_files.sh $NANOPI_MODEL full $OPENWRT_BRANCH $RELTAG
+        # ./openwrt-$OPENWRT_BRANCH/steps/organize_files.sh $NANOPI_MODEL full $OPENWRT_BRANCH $RELTAG
         cp -r -f build/openwrt/.config build/openwrt/bin
         echo "status=success" >> $GITHUB_OUTPUT
         echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
